@@ -1,0 +1,152 @@
+/* Stránka o mořčatech pro děti — velké písmo, vysoký kontrast, žádné externí zdroje */
+
+:root {
+  --bg: #fffdf7;
+  --ink: #2b2b2b;
+  --brand: #6a8c3f;
+  --brand-dark: #4f6a2c;
+  --accent: #f4ead2;
+  --card: #ffffff;
+  --maxtext: 34rem;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  /* Velké základní písmo pro malé čtenáře */
+  font-size: 22px;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+/* Hlavička */
+.hero {
+  background: var(--brand);
+  color: #ffffff;
+  text-align: center;
+  padding: 2rem 1rem 2.4rem;
+}
+
+.hero h1 {
+  font-size: 2.2rem;
+  margin: 0 0 0.6rem;
+}
+
+.lead {
+  max-width: var(--maxtext);
+  margin: 0 auto;
+  font-size: 1.15rem;
+}
+
+/* Menu sekcí — čistě HTML kotvy, žádný JavaScript */
+.menu {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1rem;
+  background: var(--accent);
+}
+
+.menu a {
+  display: inline-block;
+  background: #ffffff;
+  color: var(--brand-dark);
+  text-decoration: none;
+  font-weight: 700;
+  padding: 0.5rem 0.9rem;
+  border-radius: 12px;
+  border: 2px solid var(--brand);
+}
+
+.menu a:hover,
+.menu a:focus { background: var(--brand); color: #ffffff; }
+
+/* Obsah */
+main { padding: 1rem; }
+
+section {
+  background: var(--card);
+  max-width: 44rem;
+  margin: 1.4rem auto;
+  padding: 1.2rem 1.4rem 1.6rem;
+  border-radius: 18px;
+  border: 3px solid var(--accent);
+}
+
+h2 {
+  font-size: 1.7rem;
+  color: var(--brand-dark);
+  border-bottom: 4px solid var(--accent);
+  padding-bottom: 0.3rem;
+  margin-top: 0;
+}
+
+/* Krátké řádky textu se snáz čtou */
+section p,
+section li { max-width: var(--maxtext); }
+
+ul { padding-left: 1.3rem; }
+li { margin: 0.4rem 0; }
+
+/* Obrázky nesou význam — velké, s popiskem */
+figure { margin: 1rem 0; }
+
+figure img {
+  display: block;
+  width: 100%;
+  max-width: 30rem;
+  height: auto;
+  border-radius: 14px;
+  margin: 0 auto;
+}
+
+figcaption {
+  text-align: center;
+  font-size: 1rem;
+  color: #555;
+  margin-top: 0.5rem;
+}
+
+.tip {
+  background: var(--accent);
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  font-weight: 600;
+}
+
+.back { text-align: center; }
+
+.back a {
+  color: var(--brand-dark);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* Patička s atribucí (prostý text, žádné odkazy ven) */
+footer {
+  background: var(--accent);
+  padding: 1.4rem 1rem 2rem;
+  margin-top: 1.5rem;
+}
+
+footer h2 {
+  text-align: center;
+  border: 0;
+  font-size: 1.3rem;
+}
+
+footer p,
+.credits {
+  max-width: var(--maxtext);
+  margin: 0.4rem auto;
+  font-size: 0.95rem;
+}
+
+.credits { padding-left: 1.2rem; }
