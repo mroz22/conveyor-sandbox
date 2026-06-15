@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # verify.sh — acceptance-criteria check for the guinea-pig page.
 # This is the proof-of-concept gate: it asserts every testable criterion from
-# the plan (issue #1). Exits non-zero on the first failure.
+# the plan (issue #1). Runs ALL checks and exits non-zero if any of them failed.
 set -uo pipefail
 
 cd "$(dirname "$0")/.."
@@ -23,13 +23,15 @@ for id in jak-vypadaji co-ji kde-bydli starat zajimavosti; do
   grep -q "id=\"$id\"" index.html && pass "section #$id" || bad "section #$id missing"
 done
 
-echo "== 4. Base font-size >= 20px =="
-# Pull the first html{ ... font-size: NNpx } base rule.
-base_fs=$(grep -Eo 'font-size:[[:space:]]*[0-9]+px' style.css | grep -Eo '[0-9]+' | head -1)
+echo "== 4. Base font-size >= 20px (anchored to the html { } rule) =="
+# Read font-size only from inside the html { ... } block, so an unrelated px
+# rule elsewhere in the file can never satisfy or break this assertion.
+base_fs=$(awk '/html[[:space:]]*\{/{f=1} f{print} /\}/{if(f)exit}' style.css \
+          | grep -oE 'font-size:[[:space:]]*[0-9]+px' | grep -oE '[0-9]+' | head -1)
 if [ -n "$base_fs" ] && [ "$base_fs" -ge 20 ]; then
-  pass "base font-size is ${base_fs}px (>= 20)"
+  pass "html base font-size is ${base_fs}px (>= 20)"
 else
-  bad "base font-size is '${base_fs:-none}px' (< 20 or not found)"
+  bad "html base font-size is '${base_fs:-none}px' (< 20 or not found in html{})"
 fi
 
 echo "== 5. No JavaScript =="
@@ -39,44 +41,53 @@ else
   pass "no <script> or inline JS handlers"
 fi
 
-echo "== 6. No external URLs / outbound links in index.html and style.css =="
-if grep -nE 'https?://' index.html style.css; then
+echo "== 6. No external URLs / outbound links (index.html, style.css, favicon.svg) =="
+# favicon.svg legitimately contains the SVG XML namespace; whitelist only that.
+ext=$( { grep -nE 'https?://' index.html style.css; \
+         grep -nE 'https?://' favicon.svg | grep -v 'www\.w3\.org/2000/svg'; } 2>/dev/null )
+if [ -n "$ext" ]; then
+  printf '%s\n' "$ext"
   bad "external http(s):// URL found above"
 else
-  pass "no http(s):// in index.html or style.css"
+  pass "no external http(s):// URLs (SVG namespace whitelisted)"
 fi
 
-echo "== 7. Every <img> has an alt attribute =="
-imgs_total=$(grep -oE '<img[^>]*>' index.html | wc -l | tr -d ' ')
-imgs_noalt=$(grep -oE '<img[^>]*>' index.html | grep -vc 'alt=')
-if [ "$imgs_noalt" -eq 0 ]; then
-  pass "all $imgs_total <img> tags have alt="
-else
-  bad "$imgs_noalt of $imgs_total <img> tags missing alt="
-fi
+echo "== 7. Every <img> has a non-empty alt attribute =="
+bad_alt=0
+while IFS= read -r tag; do
+  printf '%s' "$tag" | grep -qE '[[:space:]]alt="[^"]+"' || { bad "img without non-empty alt: $tag"; bad_alt=1; }
+done < <(grep -oE '<img[^>]*>' index.html)
+[ "$bad_alt" -eq 0 ] && pass "all <img> tags have a non-empty alt="
 
 echo "== 8. All referenced images are local and exist =="
-# every src must point inside images/ (no external image hosts)
-srcs=$(grep -oE 'src="[^"]+"' index.html | sed -E 's/src="([^"]+)"/\1/')
-img_count=0
-for s in $srcs; do
+while IFS= read -r s; do
   case "$s" in
     http*://*) bad "external image src: $s" ;;
-    images/*)
-      if [ -f "$s" ]; then pass "image exists: $s"; img_count=$((img_count+1));
-      else bad "referenced image missing: $s"; fi ;;
+    images/*)  [ -f "$s" ] && pass "image exists: $s" || bad "referenced image missing: $s" ;;
     *) bad "unexpected src (not under images/): $s" ;;
   esac
-done
+done < <(grep -oE 'src="[^"]+"' index.html | sed -E 's/src="([^"]+)"/\1/')
 
-echo "== 9. At least 4 images (plan floor) =="
+echo "== 9. At least 4 images on disk (plan floor) =="
 on_disk=$(find images -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) | wc -l | tr -d ' ')
 if [ "$on_disk" -ge 4 ]; then pass "$on_disk image files on disk (>= 4)"; else bad "only $on_disk image files (< 4)"; fi
 
 echo "== 10. Each content section has at least one image (image-per-concept) =="
-# crude: count <figure> blocks; expect one per section minimum (>=5)
-figs=$(grep -c '<figure>' index.html)
-if [ "$figs" -ge 5 ]; then pass "$figs <figure> blocks (>= 5 sections)"; else bad "only $figs <figure> blocks (< 5)"; fi
+missing=$(awk '
+  /<section /{ if(insec && !hasimg) print secid;
+               insec=1; hasimg=0;
+               if(match($0,/id="[^"]+"/)) secid=substr($0,RSTART+4,RLENGTH-5) }
+  insec && /<img/{ hasimg=1 }
+  END{ if(insec && !hasimg) print secid }
+' index.html)
+if [ -z "$missing" ]; then pass "every <section> has >= 1 <img>"; else bad "section(s) without an image: $missing"; fi
+
+echo "== 11. Every in-page anchor (#id) resolves to a matching id =="
+bad_anchor=0
+while IFS= read -r a; do
+  grep -q "id=\"$a\"" index.html || { bad "anchor #$a has no matching id"; bad_anchor=1; }
+done < <(grep -oE 'href="#[^"]+"' index.html | sed -E 's/href="#([^"]+)"/\1/')
+[ "$bad_anchor" -eq 0 ] && pass "all #anchors resolve to an id"
 
 echo
 if [ "$fail" -eq 0 ]; then
