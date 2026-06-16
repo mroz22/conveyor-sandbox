@@ -96,10 +96,12 @@ img_in_sec=$(printf '%s' "$sec" | grep -oE '<img' | wc -l | tr -d ' ')
   || bad "kde-bydli has only $img_in_sec images (< 3 cage types)"
 printf '%s' "$sec" | grep -qi 'vícepatrov' \
   && pass "multi-level (vícepatrová) cage mentioned" || bad "multi-level cage not mentioned"
-if printf '%s' "$sec" | grep -qi 'rampa' && printf '%s' "$sec" | grep -qiE 'nespadl|pevná'; then
-  pass "multi-level cage has safety framing (ramp + can't-fall / solid)"
+if printf '%s' "$sec" | grep -qi 'rampa' \
+   && printf '%s' "$sec" | grep -qi 'pevná' \
+   && printf '%s' "$sec" | grep -qi 'nespadl'; then
+  pass "multi-level cage has safety framing (ramp + solid + can't-fall)"
 else
-  bad "multi-level cage missing safety framing (ramp + nespadl/pevná)"
+  bad "multi-level cage missing safety framing (needs rampa + pevná + nespadl)"
 fi
 if printf '%s' "$sec" | grep -qi 'rozmazlit'; then
   pass "'Jak mořče rozmazlit' premium-care tips present"
@@ -107,7 +109,7 @@ else
   bad "premium-care tips ('Jak mořče rozmazlit') missing"
 fi
 for im in images/klec-vicepatrova.svg images/klec-domecek-tunely.svg; do
-  grep -q "$im" index.html && pass "references $im" || bad "missing reference to $im"
+  grep -qF "$im" index.html && pass "references $im" || bad "missing reference to $im"
 done
 
 echo
