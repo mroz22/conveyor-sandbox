@@ -89,6 +89,27 @@ while IFS= read -r a; do
 done < <(grep -oE 'href="#[^"]+"' index.html | sed -E 's/href="#([^"]+)"/\1/')
 [ "$bad_anchor" -eq 0 ] && pass "all #anchors resolve to an id"
 
+echo "== 12. 'Kde bydlí' covers cage types incl. a safely-framed multi-level cage =="
+sec=$(awk '/<section id="kde-bydli"/{f=1} f{print} f&&/<\/section>/{exit}' index.html)
+img_in_sec=$(printf '%s' "$sec" | grep -oE '<img' | wc -l | tr -d ' ')
+[ "$img_in_sec" -ge 3 ] && pass "kde-bydli has $img_in_sec images (>= 3 cage types)" \
+  || bad "kde-bydli has only $img_in_sec images (< 3 cage types)"
+printf '%s' "$sec" | grep -qi 'vícepatrov' \
+  && pass "multi-level (vícepatrová) cage mentioned" || bad "multi-level cage not mentioned"
+if printf '%s' "$sec" | grep -qi 'rampa' && printf '%s' "$sec" | grep -qiE 'nespadl|pevná'; then
+  pass "multi-level cage has safety framing (ramp + can't-fall / solid)"
+else
+  bad "multi-level cage missing safety framing (ramp + nespadl/pevná)"
+fi
+if printf '%s' "$sec" | grep -qi 'rozmazlit'; then
+  pass "'Jak mořče rozmazlit' premium-care tips present"
+else
+  bad "premium-care tips ('Jak mořče rozmazlit') missing"
+fi
+for im in images/klec-vicepatrova.svg images/klec-domecek-tunely.svg; do
+  grep -q "$im" index.html && pass "references $im" || bad "missing reference to $im"
+done
+
 echo
 if [ "$fail" -eq 0 ]; then
   echo -e "\033[32mAll acceptance criteria passed.\033[0m"
