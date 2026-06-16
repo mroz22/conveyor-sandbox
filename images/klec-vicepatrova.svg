@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" role="img" aria-label="Kresba vícepatrové klece s nízkou rampou mezi dvěma patry">
+  <rect width="480" height="320" fill="#fdf6ec"/>
+  <!-- podlaha -->
+  <rect x="40" y="280" width="400" height="14" rx="4" fill="#caa472"/>
+  <!-- spodni patro -->
+  <rect x="60" y="170" width="360" height="110" rx="8" fill="#fff" stroke="#8a6a3b" stroke-width="4"/>
+  <!-- horni patro -->
+  <rect x="60" y="60" width="220" height="90" rx="8" fill="#fff" stroke="#8a6a3b" stroke-width="4"/>
+  <!-- mrize spodni -->
+  <g stroke="#cdb892" stroke-width="3">
+    <line x1="100" y1="174" x2="100" y2="276"/>
+    <line x1="140" y1="174" x2="140" y2="276"/>
+    <line x1="180" y1="174" x2="180" y2="276"/>
+    <line x1="220" y1="174" x2="220" y2="276"/>
+    <line x1="260" y1="174" x2="260" y2="276"/>
+    <line x1="300" y1="174" x2="300" y2="276"/>
+    <line x1="340" y1="174" x2="340" y2="276"/>
+    <line x1="380" y1="174" x2="380" y2="276"/>
+  </g>
+  <!-- mrize horni -->
+  <g stroke="#cdb892" stroke-width="3">
+    <line x1="100" y1="64" x2="100" y2="146"/>
+    <line x1="140" y1="64" x2="140" y2="146"/>
+    <line x1="180" y1="64" x2="180" y2="146"/>
+    <line x1="220" y1="64" x2="220" y2="146"/>
+  </g>
+  <!-- nizka pevna rampa mezi patry -->
+  <polygon points="280,150 360,150 320,200 280,200" fill="#d8b27a" stroke="#8a6a3b" stroke-width="3"/>
+  <!-- zabradli rampy -->
+  <line x1="280" y1="150" x2="320" y2="200" stroke="#8a6a3b" stroke-width="4"/>
+  <!-- seno -->
+  <path d="M70 270 q10 -18 22 0 q10 -16 20 0 q10 -18 20 0" fill="none" stroke="#e0c067" stroke-width="4"/>
+  <!-- morce -->
+  <g>
+    <ellipse cx="150" cy="245" rx="36" ry="24" fill="#a9743f"/>
+    <circle cx="184" cy="238" r="13" fill="#caa06a"/>
+    <circle cx="187" cy="234" r="2.5" fill="#3a2a18"/>
+    <ellipse cx="178" cy="228" rx="4" ry="6" fill="#8a5a2c"/>
+  </g>
+  <!-- popisek bezpecne rampy -->
+  <text x="332" y="135" font-family="Arial, sans-serif" font-size="14" fill="#6b4f29">nízká pevná rampa</text>
+</svg>
